@@ -35,7 +35,6 @@ class VAST {
         $adsystemAttributes= array('version'=>'2.0');
         $this->addAttributes( $adSystem, $adsystemAttributes);
 
-
         $adTitle = $this->doc->createElement("AdTitle");
         $description = $this->doc->createElement("Description");
         $survey = $this->doc->createElement("Survey");
