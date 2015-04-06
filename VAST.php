@@ -19,6 +19,11 @@ class VAST {
         $vastAttributes=array('version'=>'3.0', 'xmlns:xsi'=>'http://www.w3.org/2001/XMLSchema-instance','xsi:noNamespaceSchemaLocation'=> 'vast.xsd'); 
         $this->addAttributes( $root, $vastAttributes);
 
+        $this->createAd($root);
+        echo $this->doc->saveXML(), "\n";
+    }
+    
+    public function createAd($root){
         //ad header
         $ad = $this->doc->createElement("Ad");
         $adAttributes=array('id'=>'preroll-1','sequence'=>'1');
@@ -48,12 +53,12 @@ class VAST {
 
         $ad->appendChild($inLine);
         $root->appendChild($ad);
-
-        echo $this->doc->saveXML(), "\n";
     }
 
     public function generateCreatives($creatives) {
         $creative=$this->doc->createElement("Creative");
+        $creative_attributes= array('sequence'=>'1','AdID'=>'');
+        $this->addAttributes($creative, $creative_attributes);
         
         $linear = $this->doc->createElement("Linear");
         $linear_attributes= array('skipoffset'=>'20%');
@@ -123,12 +128,10 @@ class VAST {
     
     public function videoClicks($videoClicks){
         //ClickThrough
-        /* @var $doc type */
         $clickThrough = $this->doc->createElement("ClickThrough");
         $videoClicks->appendChild($clickThrough);
         
         //ClickTracking
-        
         $clickTracking = $this->doc->createElement("ClickTracking");
         $videoClicks->appendChild($clickTracking);
         
