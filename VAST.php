@@ -53,16 +53,16 @@ class VAST {
     }
 
     public function generateCreatives($creatives) {
+        $creative=$this->doc->createElement("Creative");
+        
         $linear = $this->doc->createElement("Linear");
-        $linear_skipoffset = $this->doc->createAttribute("skipoffset");
-        $linear_skipoffset->value = '20%';
-        $linear->appendChild($linear_skipoffset);
+        $linear_attributes= array('skipoffset'=>'20%');
+        $this->addAttributes($linear, $linear_attributes);
 
         $duration = $this->doc->createElement("Duration");
         $linear->appendChild($duration);
 
         //TrackingEvents
-
         $trackingEvents = $this->doc->createElement("TrackingEvents");
         $linear->appendChild($trackingEvents);
 
@@ -107,7 +107,8 @@ class VAST {
         
         $this->mediaFiles($mediaFiles,$medias);
         
-        $creatives->appendChild($linear);
+        $creative->appendChild($linear);
+        $creatives->appendChild($creative);
     }
 
     public function generateTrackingEvent($trackingEvents, $events) {
