@@ -6,7 +6,7 @@
  * @author prottoy
  */
 class VAST {
-    public $doc;
+    private $doc;
 
     public function generateVAST() {
         $this->doc = new DOMDocument('1.0', 'utf-8');
@@ -19,14 +19,14 @@ class VAST {
         $vastAttributes=array('version'=>'3.0', 'xmlns:xsi'=>'http://www.w3.org/2001/XMLSchema-instance','xsi:noNamespaceSchemaLocation'=> 'vast.xsd'); 
         $this->addAttributes( $root, $vastAttributes);
 
-        $this->createAd($root);
+        $this->createAd($root,'preroll-1','1');
         echo $this->doc->saveXML(), "\n";
     }
     
-    public function createAd($root){
+    private function createAd($root,$id,$sequence){
         //ad header
         $ad = $this->doc->createElement("Ad");
-        $adAttributes=array('id'=>'preroll-1','sequence'=>'1');
+        $adAttributes=array('id'=>$id,'sequence'=>$sequence);
         $this->addAttributes( $ad, $adAttributes);
         
        
@@ -54,7 +54,7 @@ class VAST {
         $root->appendChild($ad);
     }
 
-    public function generateCreatives($creatives) {
+    private function generateCreatives($creatives) {
         $creative=$this->doc->createElement("Creative");
         $creative_attributes= array('sequence'=>'1','AdID'=>'');
         $this->addAttributes($creative, $creative_attributes);
@@ -115,7 +115,7 @@ class VAST {
         $creatives->appendChild($creative);
     }
 
-    public function generateTrackingEvent($trackingEvents, $events) {
+    private function generateTrackingEvent($trackingEvents, $events) {
         foreach ($events as $event) {
             $tracking = $this->doc->createElement("Tracking");
             $tracking_event = $this->doc->createAttribute("event");
@@ -125,7 +125,7 @@ class VAST {
         }
     }
     
-    public function videoClicks($videoClicks){
+    private function videoClicks($videoClicks){
         //ClickThrough
         $clickThrough = $this->doc->createElement("ClickThrough");
         $videoClicks->appendChild($clickThrough);
@@ -139,7 +139,7 @@ class VAST {
         $clickTracking->appendChild($clickTracking_id);
     }
     
-    public function mediaFiles( $mediaFiles,$medias){
+    private function mediaFiles( $mediaFiles,$medias){
         foreach ($medias as $file => $attributes) {
             $mediaFile = $this->doc->createElement("MediaFile");
             $filename = $this->doc->createCDATASection($file);
@@ -150,7 +150,7 @@ class VAST {
         }
     }
     
-    public function addAttributes($parent, $attributes){
+    private function addAttributes($parent, $attributes){
         foreach ($attributes as $key => $value) {
             $attr = $this->doc->createAttribute($key);
             $attr->value = $value;
@@ -159,7 +159,7 @@ class VAST {
             
     }
     
-    public function appendChilds($parent,$childs){
+    private function appendChilds($parent,$childs){
         foreach ($childs as $child) {
             $parent->appendChild($child);
         }
