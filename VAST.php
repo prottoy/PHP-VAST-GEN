@@ -6,44 +6,42 @@
  * @author prottoy
  */
 class VAST {
-    public static $doc;
+    public $doc;
+
     public function generateVAST() {
-        $doc = new DOMDocument('1.0', 'utf-8');
+        $this->doc = new DOMDocument('1.0', 'utf-8');
 
         header("Content-type: text/xml");
-        $doc->formatOutput = true;
+        $this->doc->formatOutput = true;
 
-        
-        //Vast header
-        $root = $doc->createElement("VAST");
-        $doc->appendChild($root);
+        $root = $this->doc->createElement("VAST");
+        $this->doc->appendChild($root);
         $vastAttributes=array('version'=>'3.0', 'xmlns:xsi'=>'http://www.w3.org/2001/XMLSchema-instance','xsi:noNamespaceSchemaLocation'=> 'vast.xsd'); 
-        $this->addAttributes($doc, $root, $vastAttributes);
-
+        $this->addAttributes( $root, $vastAttributes);
 
         //ad header
-        $ad = $doc->createElement("Ad");        
-        $adAttributes=array('id'=>'preroll-1','sequence'=>'1'); 
-        $this->addAttributes($doc, $ad, $adAttributes);
+        $ad = $this->doc->createElement("Ad");
+        $adAttributes=array('id'=>'preroll-1','sequence'=>'1');
+        $this->addAttributes( $ad, $adAttributes);
         
        
-        $inLine = $doc->createElement("InLine");
-        $adSystem = $doc->createElement("AdSystem");
+        $inLine = $this->doc->createElement("InLine");
+        $adSystem = $this->doc->createElement("AdSystem");
         $adsystemAttributes= array('version'=>'2.0');
-        $this->addAttributes($doc, $adSystem, $adsystemAttributes);
+        $this->addAttributes( $adSystem, $adsystemAttributes);
 
 
-        $adTitle = $doc->createElement("AdTitle");
-        $description = $doc->createElement("Description");
-        $survey = $doc->createElement("Survey");
+        $adTitle = $this->doc->createElement("AdTitle");
+        $description = $this->doc->createElement("Description");
+        $survey = $this->doc->createElement("Survey");
         
-        $impression = $doc->createElement("Impression");
+        $impression = $this->doc->createElement("Impression");
         $impressionAttributes= array('id'=>'DART');
-        $this->addAttributes($doc, $impression, $impressionAttributes);
+        $this->addAttributes($impression, $impressionAttributes);
         
-        $creatives = $doc->createElement("Creatives");
+        $creatives = $this->doc->createElement("Creatives");
 
-        $this->generateCreatives($doc, $creatives);
+        $this->generateCreatives($creatives);
         
         $childs= array($adSystem, $adTitle, $description, $survey, $impression, $creatives);        
         $this->appendChilds($inLine, $childs);
@@ -51,38 +49,38 @@ class VAST {
         $ad->appendChild($inLine);
         $root->appendChild($ad);
 
-        echo $doc->saveXML(), "\n";
+        echo $this->doc->saveXML(), "\n";
     }
 
-    public function generateCreatives($doc, $creatives) {
-        $linear = $doc->createElement("Linear");
-        $linear_skipoffset = $doc->createAttribute("skipoffset");
+    public function generateCreatives($creatives) {
+        $linear = $this->doc->createElement("Linear");
+        $linear_skipoffset = $this->doc->createAttribute("skipoffset");
         $linear_skipoffset->value = '20%';
         $linear->appendChild($linear_skipoffset);
 
-        $duration = $doc->createElement("Duration");
+        $duration = $this->doc->createElement("Duration");
         $linear->appendChild($duration);
 
         //TrackingEvents
 
-        $trackingEvents = $doc->createElement("TrackingEvents");
+        $trackingEvents = $this->doc->createElement("TrackingEvents");
         $linear->appendChild($trackingEvents);
 
         $events = array('start', 'midpoint', 'complete', 'mute', 'pause', 'fullscreen');
-        $this->generateTrackingEvent($doc, $trackingEvents,$events);
+        $this->generateTrackingEvent($trackingEvents,$events);
         
         //AdParameters
-        $adParameters = $doc->createElement("AdParameters");
+        $adParameters = $this->doc->createElement("AdParameters");
         $linear->appendChild($adParameters);
         
         //VideoClicks
-        $videoClicks = $doc->createElement("VideoClicks");
+        $videoClicks = $this->doc->createElement("VideoClicks");
         $linear->appendChild($videoClicks);
         
-        $this->videoClicks($doc, $videoClicks);
+        $this->videoClicks($videoClicks);
         
         //VideoClicks
-        $mediaFiles = $doc->createElement("MediaFiles");
+        $mediaFiles = $this->doc->createElement("MediaFiles");
         $linear->appendChild($mediaFiles);
         
         $file1='http://cdnapi.kaltura.com/p/777122/sp/77712200/playManifest/entryId/0_vriq23ct/flavorId/0_g0vnoj5i/format/url/protocol/http/a.mp4';
@@ -107,49 +105,51 @@ class VAST {
         
         $medias= array($file1=>$attributes1, $file2=>$attributes2);
         
-        $this->mediaFiles($doc, $mediaFiles,$medias);
+        $this->mediaFiles($mediaFiles,$medias);
         
         $creatives->appendChild($linear);
     }
 
-    public function generateTrackingEvent($doc, $trackingEvents, $events) {
+    public function generateTrackingEvent($trackingEvents, $events) {
         foreach ($events as $event) {
-            $tracking = $doc->createElement("Tracking");
-            $tracking_event = $doc->createAttribute("event");
+            $tracking = $this->doc->createElement("Tracking");
+            $tracking_event = $this->doc->createAttribute("event");
             $tracking_event->value = $event;
             $tracking->appendChild($tracking_event);
             $trackingEvents->appendChild($tracking);
         }
     }
     
-    public function videoClicks($doc, $videoClicks){
+    public function videoClicks($videoClicks){
         //ClickThrough
-        $clickThrough = $doc->createElement("ClickThrough");
+        /* @var $doc type */
+        $clickThrough = $this->doc->createElement("ClickThrough");
         $videoClicks->appendChild($clickThrough);
         
         //ClickTracking
-        $clickTracking = $doc->createElement("ClickTracking");
+        
+        $clickTracking = $this->doc->createElement("ClickTracking");
         $videoClicks->appendChild($clickTracking);
         
-        $clickTracking_id = $doc->createAttribute("id");
+        $clickTracking_id = $this->doc->createAttribute("id");
         $clickTracking_id->value = 'DART';
         $clickTracking->appendChild($clickTracking_id);
     }
     
-    public function mediaFiles($doc, $mediaFiles,$medias){
+    public function mediaFiles( $mediaFiles,$medias){
         foreach ($medias as $file => $attributes) {
-            $mediaFile = $doc->createElement("MediaFile");
-            $filename = $doc->createCDATASection($file);
+            $mediaFile = $this->doc->createElement("MediaFile");
+            $filename = $this->doc->createCDATASection($file);
             $mediaFile->appendChild($filename);
             
-            $this->addAttributes($doc, $mediaFile, $attributes);
+            $this->addAttributes($mediaFile, $attributes);
             $mediaFiles->appendChild($mediaFile);
         }
     }
     
-    public function addAttributes($doc,$parent, $attributes){
+    public function addAttributes($parent, $attributes){
         foreach ($attributes as $key => $value) {
-            $attr = $doc->createAttribute($key);
+            $attr = $this->doc->createAttribute($key);
             $attr->value = $value;
             $parent->appendChild($attr);
         }
