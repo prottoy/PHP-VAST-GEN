@@ -1,16 +1,11 @@
 <?php
 include 'VAST.php';
+header('Access-Control-Allow-Origin: *');
 //showErrors();
 
 $obj= new VAST();
-$obj->GNRfileUrl='http://www.green-red.com/nayon.mp4';
-$obj->GNRImpresssionURL='http://www.green-red.com';
-$obj->GNRClickThroughURL="https://www.facebook.com/GandRTech";
+$obj->gnrFileUrl='http://www.green-red.com/nayon.mp4';
+$obj->gnrImpresssionURL='http://www.green-red.com';
+$obj->gnrClickThroughURL="https://www.facebook.com/GandRTech";
 $obj->generateVAST();
-
-function showErrors(){
-    ini_set('display_errors',1);
-    ini_set('display_startup_errors',1);
-    error_reporting(-1);    
-}
 ?>

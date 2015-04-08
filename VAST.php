@@ -5,18 +5,19 @@
  * 
  * @author prottoy
  */
-
 class VAST {
-    public $GNRAdId = "preroll-1";
-    public $GNRAdSystem = "1.0";
-    public $GNRAdTitle;
-    public $GNRImpresssionURL;
-    public $GNRClickThroughURL;
-    public $GNRfileUrl;
-    
+
+    public $gnrAdId = "preroll-1";
+    public $gnrAdSystem = "1.0";
+    public $gnrAdTitle;
+    public $gnrImpresssionURL;
+    public $gnrClickThroughURL;
+    public $gnrFileUrl;
+    public $reportError;
     private $doc;
 
     public function generateVAST() {
+//        $this->showErrors();
         $this->doc = new DOMDocument('1.0', 'utf-8');
 
         header("Content-type: text/xml");
@@ -27,7 +28,7 @@ class VAST {
         $vastAttributes = array('version' => '3.0', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 'xsi:noNamespaceSchemaLocation' => 'vast.xsd');
         $this->addAttributes($root, $vastAttributes);
 
-        $this->createAd($root, $this->GNRAdId, '1');
+        $this->createAd($root, $this->gnrAdId, '1');
         echo $this->doc->saveXML(), "\n";
     }
 
@@ -40,7 +41,7 @@ class VAST {
 
         $inLine = $this->doc->createElement("InLine");
         $adSystem = $this->doc->createElement("AdSystem");
-        $adsystemAttributes = array('version' => $this->GNRAdSystem);
+        $adsystemAttributes = array('version' => $this->gnrAdSystem);
         $this->addAttributes($adSystem, $adsystemAttributes);
         $this->addValue($adSystem, 'GNRVAST');
 
@@ -51,7 +52,7 @@ class VAST {
         $impression = $this->doc->createElement("Impression");
         $impressionAttributes = array('id' => 'GNR');
         $this->addAttributes($impression, $impressionAttributes);
-        $this->addCDATAValue($impression, $this->GNRImpresssionURL);
+        $this->addCDATAValue($impression, $this->gnrImpresssionURL);
 
         $creatives = $this->doc->createElement("Creatives");
 
@@ -82,7 +83,6 @@ class VAST {
 
 //        $events = array('start', 'midpoint', 'complete', 'mute', 'pause', 'fullscreen');
 //        $this->generateTrackingEvent($trackingEvents, $events);
-
         //AdParameters
         $adParameters = $this->doc->createElement("AdParameters");
         $linear->appendChild($adParameters);
@@ -96,8 +96,8 @@ class VAST {
         //VideoClicks
         $mediaFiles = $this->doc->createElement("MediaFiles");
         $linear->appendChild($mediaFiles);
-        
-        $file1 = $this->GNRfileUrl;
+
+        $file1 = $this->gnrFileUrl;
         $attributes1 = array(
             'id' => '1',
             'delivery' => 'progressive',
@@ -130,7 +130,7 @@ class VAST {
         //ClickThrough
         $clickThrough = $this->doc->createElement("ClickThrough");
         $videoClicks->appendChild($clickThrough);
-        $this->addCDATAValue($clickThrough, $this->GNRClickThroughURL);
+        $this->addCDATAValue($clickThrough, $this->gnrClickThroughURL);
 
         //ClickTracking
         $clickTracking = $this->doc->createElement("ClickTracking");
@@ -176,6 +176,15 @@ class VAST {
         // create another text node
         $value = $this->doc->createCDATASection($text);
         $parent->appendChild($value);
+    }
+
+    public function showErrors() {
+        if (strcmp($this->reportError, 'yes')) {
+            echo "Error reporting on";
+            ini_set('display_errors', 1);
+            ini_set('display_startup_errors', 1);
+            error_reporting(-1);
+        }
     }
 
 }
