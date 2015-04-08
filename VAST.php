@@ -5,7 +5,15 @@
  * 
  * @author prottoy
  */
+
 class VAST {
+    public $GNRAdId = "preroll-1";
+    public $GNRAdSystem = "1.0";
+    public $GNRAdTitle;
+    public $GNRImpresssionURL;
+    public $GNRClickThroughURL;
+    public $GNRfileUrl;
+    
     private $doc;
 
     public function generateVAST() {
@@ -16,38 +24,40 @@ class VAST {
 
         $root = $this->doc->createElement("VAST");
         $this->doc->appendChild($root);
-        $vastAttributes=array('version'=>'3.0', 'xmlns:xsi'=>'http://www.w3.org/2001/XMLSchema-instance','xsi:noNamespaceSchemaLocation'=> 'vast.xsd'); 
-        $this->addAttributes( $root, $vastAttributes);
+        $vastAttributes = array('version' => '3.0', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 'xsi:noNamespaceSchemaLocation' => 'vast.xsd');
+        $this->addAttributes($root, $vastAttributes);
 
-        $this->createAd($root,'preroll-1','1');
+        $this->createAd($root, $this->GNRAdId, '1');
         echo $this->doc->saveXML(), "\n";
     }
-    
-    private function createAd($root,$id,$sequence){
+
+    private function createAd($root, $id, $sequence) {
         //ad header
         $ad = $this->doc->createElement("Ad");
-        $adAttributes=array('id'=>$id,'sequence'=>$sequence);
-        $this->addAttributes( $ad, $adAttributes);
-        
-       
+        $adAttributes = array('id' => $id, 'sequence' => $sequence);
+        $this->addAttributes($ad, $adAttributes);
+
+
         $inLine = $this->doc->createElement("InLine");
         $adSystem = $this->doc->createElement("AdSystem");
-        $adsystemAttributes= array('version'=>'2.0');
-        $this->addAttributes( $adSystem, $adsystemAttributes);
+        $adsystemAttributes = array('version' => $this->GNRAdSystem);
+        $this->addAttributes($adSystem, $adsystemAttributes);
+        $this->addValue($adSystem, 'GNRVAST');
 
         $adTitle = $this->doc->createElement("AdTitle");
         $description = $this->doc->createElement("Description");
         $survey = $this->doc->createElement("Survey");
-        
+
         $impression = $this->doc->createElement("Impression");
-        $impressionAttributes= array('id'=>'DART');
+        $impressionAttributes = array('id' => 'GNR');
         $this->addAttributes($impression, $impressionAttributes);
-        
+        $this->addCDATAValue($impression, $this->GNRImpresssionURL);
+
         $creatives = $this->doc->createElement("Creatives");
 
         $this->generateCreatives($creatives);
-        
-        $childs= array($adSystem, $adTitle, $description, $survey, $impression, $creatives);        
+
+        $childs = array($adSystem, $adTitle, $description, $survey, $impression, $creatives);
         $this->appendChilds($inLine, $childs);
 
         $ad->appendChild($inLine);
@@ -55,12 +65,12 @@ class VAST {
     }
 
     private function generateCreatives($creatives) {
-        $creative=$this->doc->createElement("Creative");
-        $creative_attributes= array('sequence'=>'1','AdID'=>'');
+        $creative = $this->doc->createElement("Creative");
+        $creative_attributes = array('sequence' => '1', 'AdID' => '');
         $this->addAttributes($creative, $creative_attributes);
-        
+
         $linear = $this->doc->createElement("Linear");
-        $linear_attributes= array('skipoffset'=>'20%');
+        $linear_attributes = array('skipoffset' => '20%');
         $this->addAttributes($linear, $linear_attributes);
 
         $duration = $this->doc->createElement("Duration");
@@ -70,47 +80,37 @@ class VAST {
         $trackingEvents = $this->doc->createElement("TrackingEvents");
         $linear->appendChild($trackingEvents);
 
-        $events = array('start', 'midpoint', 'complete', 'mute', 'pause', 'fullscreen');
-        $this->generateTrackingEvent($trackingEvents,$events);
-        
+//        $events = array('start', 'midpoint', 'complete', 'mute', 'pause', 'fullscreen');
+//        $this->generateTrackingEvent($trackingEvents, $events);
+
         //AdParameters
         $adParameters = $this->doc->createElement("AdParameters");
         $linear->appendChild($adParameters);
-        
+
         //VideoClicks
         $videoClicks = $this->doc->createElement("VideoClicks");
         $linear->appendChild($videoClicks);
-        
+
         $this->videoClicks($videoClicks);
-        
+
         //VideoClicks
         $mediaFiles = $this->doc->createElement("MediaFiles");
         $linear->appendChild($mediaFiles);
         
-        $file1='http://cdnapi.kaltura.com/p/777122/sp/77712200/playManifest/entryId/0_vriq23ct/flavorId/0_g0vnoj5i/format/url/protocol/http/a.mp4';
-        $file2='http://cdnapi.kaltura.com/p/777122/sp/77712200/playManifest/entryId/0_vriq23ct/flavorId/0_ve7wy5mt/format/url/protocol/http/a.mp4';
-        
-        $attributes1=array(
-                'id'=>'1', 
-                'delivery'=>'progressive', 
-                'type'=>'video/mp4',
-                'bitrate'=>'1500',
-                'width'=>'720',
-                'height'=>'480');
-        
-        $attributes2=array(
-                'id'=>'2', 
-                'delivery'=>'progressive', 
-                'type'=>'video/mp4',
-                'bitrate'=>'1500',
-                'width'=>'720',
-                'height'=>'480');
-        
-        
-        $medias= array($file1=>$attributes1, $file2=>$attributes2);
-        
-        $this->mediaFiles($mediaFiles,$medias);
-        
+        $file1 = $this->GNRfileUrl;
+        $attributes1 = array(
+            'id' => '1',
+            'delivery' => 'progressive',
+            'type' => 'video/mp4',
+            'bitrate' => '1500',
+            'width' => '720',
+            'height' => '480');
+
+
+        $medias = array($file1 => $attributes1);
+
+        $this->mediaFiles($mediaFiles, $medias);
+
         $creative->appendChild($linear);
         $creatives->appendChild($creative);
     }
@@ -122,47 +122,60 @@ class VAST {
             $tracking_event->value = $event;
             $tracking->appendChild($tracking_event);
             $trackingEvents->appendChild($tracking);
+            $this->addCDATAValue($trackingEvents, 'http://www.green-red.com');
         }
     }
-    
-    private function videoClicks($videoClicks){
+
+    private function videoClicks($videoClicks) {
         //ClickThrough
         $clickThrough = $this->doc->createElement("ClickThrough");
         $videoClicks->appendChild($clickThrough);
-        
+        $this->addCDATAValue($clickThrough, $this->GNRClickThroughURL);
+
         //ClickTracking
         $clickTracking = $this->doc->createElement("ClickTracking");
         $videoClicks->appendChild($clickTracking);
-        
+
         $clickTracking_id = $this->doc->createAttribute("id");
-        $clickTracking_id->value = 'DART';
+        $clickTracking_id->value = 'GNR';
         $clickTracking->appendChild($clickTracking_id);
     }
-    
-    private function mediaFiles( $mediaFiles,$medias){
+
+    private function mediaFiles($mediaFiles, $medias) {
         foreach ($medias as $file => $attributes) {
             $mediaFile = $this->doc->createElement("MediaFile");
             $filename = $this->doc->createCDATASection($file);
             $mediaFile->appendChild($filename);
-            
+
             $this->addAttributes($mediaFile, $attributes);
             $mediaFiles->appendChild($mediaFile);
         }
     }
-    
-    private function addAttributes($parent, $attributes){
+
+    private function addAttributes($parent, $attributes) {
         foreach ($attributes as $key => $value) {
             $attr = $this->doc->createAttribute($key);
             $attr->value = $value;
             $parent->appendChild($attr);
         }
-            
     }
-    
-    private function appendChilds($parent,$childs){
+
+    private function appendChilds($parent, $childs) {
         foreach ($childs as $child) {
             $parent->appendChild($child);
         }
+    }
+
+    private function addValue($parent, $text) {
+        // create another text node
+        $value = $this->doc->createTextNode($text);
+        $parent->appendChild($value);
+    }
+
+    private function addCDATAValue($parent, $text) {
+        // create another text node
+        $value = $this->doc->createCDATASection($text);
+        $parent->appendChild($value);
     }
 
 }

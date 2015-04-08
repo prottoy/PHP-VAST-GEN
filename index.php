@@ -1,9 +1,11 @@
 <?php
 include 'VAST.php';
-
-showErrors();
+//showErrors();
 
 $obj= new VAST();
+$obj->GNRfileUrl='http://www.green-red.com/nayon.mp4';
+$obj->GNRImpresssionURL='http://www.green-red.com';
+$obj->GNRClickThroughURL="https://www.facebook.com/GandRTech";
 $obj->generateVAST();
 
 function showErrors(){
